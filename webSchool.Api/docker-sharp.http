@@ -1,0 +1,11 @@
+@docker_sharp_HostAddress = http://localhost:5079
+
+GET {{docker_sharp_HostAddress}}/todos/
+Accept: application/json
+
+###
+
+GET {{docker_sharp_HostAddress}}/todos/1
+Accept: application/json
+
+###
