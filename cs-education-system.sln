@@ -1,18 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 #
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Api", "webSchool.Api\webSchool.Api.csproj", "{8071352A-C6E0-4609-B6FD-4213C51E19C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Api", "src\webSchool.Api\webSchool.Api.csproj", "{8071352A-C6E0-4609-B6FD-4213C51E19C0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8D2B1ACE-2E0C-4B03-BFB2-F2237278F721}"
 	ProjectSection(SolutionItems) = preProject
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Application", "webSchool.Application\webSchool.Application.csproj", "{1CDF231B-5EBF-472A-8A14-3FE9EF38886E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Application", "src\webSchool.Application\webSchool.Application.csproj", "{1CDF231B-5EBF-472A-8A14-3FE9EF38886E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Domain", "webSchool.Domain\webSchool.Domain.csproj", "{108C7B04-5833-4B90-B4EE-24C278EF3904}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Domain", "src\webSchool.Domain\webSchool.Domain.csproj", "{108C7B04-5833-4B90-B4EE-24C278EF3904}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Infrastructure", "webSchool.Infrastructure\webSchool.Infrastructure.csproj", "{B554470A-0CAF-4AC8-8125-CF4C6F4826C5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webSchool.Infrastructure", "src\webSchool.Infrastructure\webSchool.Infrastructure.csproj", "{B554470A-0CAF-4AC8-8125-CF4C6F4826C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
