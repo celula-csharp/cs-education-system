@@ -65,7 +65,7 @@ dotnet_analyzer_diagnostic.category-correctness.severity = warning
 # Reglas específicas
 dotnet_diagnostic.CA1822.severity = warning # Member does not access instance data
 dotnet_diagnostic.CA1307.severity = warning # Specify StringComparison
-dotnet_diagnostic.CA2007.severity = warning # Consider calling ConfigureAwait
+dotnet_diagnostic.CA2007.severity = none # Consider calling ConfigureAwait
 dotnet_diagnostic.CA2254.severity = warning # Template should be a static expression
 
 # Configuraciones de lenguaje C#

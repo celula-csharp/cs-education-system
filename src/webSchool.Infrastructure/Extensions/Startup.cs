@@ -4,7 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Extensions;
 
+using domain.Interfaces;
 using infrastructure.Data;
+using infrastructure.Repositories;
 
 public static class ServiceCollectionExtensions
 {
@@ -19,6 +21,7 @@ public static class ServiceCollectionExtensions
             )
         );
 
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         return services;
     }
 }
