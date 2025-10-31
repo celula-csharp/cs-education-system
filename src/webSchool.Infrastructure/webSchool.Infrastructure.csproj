@@ -15,4 +15,8 @@
   <ItemGroup>
     <ProjectReference Include="..\webSchool.Domain\webSchool.Domain.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
 </Project>

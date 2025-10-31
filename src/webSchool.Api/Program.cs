@@ -1,3 +1,6 @@
+using application.Extensions;
+using Infrastructure.Extensions;
+
 var builder = WebApplication.CreateSlimBuilder(args);
 
 // Conexión a DB
@@ -10,6 +13,10 @@ builder.Services.AddControllers();
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Onions
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
