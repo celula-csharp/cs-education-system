@@ -1,15 +1,14 @@
-namespace infrastructure.Data.Configurations;
+namespace Infrastructure.Data.Configurations;
 
 using domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class StudentConfiguration :  IEntityTypeConfiguration<Student>
+public class StudentConfiguration : IEntityTypeConfiguration<Student>
 {
     public void Configure(EntityTypeBuilder<Student> builder)
     {
         builder.ToTable("Students");
-
         builder.HasKey(s => s.Id);
 
         builder.Property(s => s.Name).HasMaxLength(100);
@@ -18,9 +17,13 @@ public class StudentConfiguration :  IEntityTypeConfiguration<Student>
         builder.Property(s => s.Email).HasMaxLength(120);
         builder.Property(s => s.Phone).HasMaxLength(20);
 
-        // Relación: un estudiante puede tener varias inscripciones
-        builder.HasMany<Inscription>()
+        // índices únicos
+        builder.HasIndex(s => s.Document).IsUnique();
+        builder.HasIndex(s => s.Email).IsUnique();
+
+        builder.HasMany(s => s.Inscriptions)
             .WithOne(i => i.Student)
-            .HasForeignKey(i => i.StudentId);
+            .HasForeignKey(i => i.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

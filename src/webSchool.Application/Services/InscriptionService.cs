@@ -1,20 +1,24 @@
-namespace application.Services;
-
-using application.DTOs;
-using application.Interfaces;
 using domain.Entities;
 using domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using application.DTOs;
+
+namespace application.Services;
+
+using Interfaces;
 
 public class InscriptionService : IInscriptionService
 {
     private readonly IRepository<Inscription> _repo;
     private readonly IRepository<Secction> _repoSecction;
+    private readonly IRepository<Student> _repoStudent;
 
-    public InscriptionService(IRepository<Inscription> repo, IRepository<Secction> repoSecction)
+    public InscriptionService(IRepository<Inscription> repo,
+                              IRepository<Secction> repoSecction,
+                              IRepository<Student> repoStudent)
     {
         _repo = repo;
         _repoSecction = repoSecction;
+        _repoStudent = repoStudent;
     }
 
     public async Task<List<InscriptionDto>> AllAsync()
@@ -32,33 +36,39 @@ public class InscriptionService : IInscriptionService
 
     public async Task<InscriptionDto> CreateAsync(InscriptionDto dto)
     {
-        // Validaciones base
         if (dto.StudentId <= 0 || dto.SecctionId <= 0)
             throw new ArgumentException("Estudiante y Sección son requeridos.");
 
-        // 1️⃣ Validar cupo
         var sec = await _repoSecction.ById(dto.SecctionId);
-        if (sec == null)
-            throw new ArgumentException("La sección no existe.");
+        if (sec == null) throw new ArgumentException("La sección no existe.");
 
-        // Contar inscripciones actuales (simulación sin EF Include)
+        var student = await _repoStudent.ById(dto.StudentId);
+        if (student == null) throw new ArgumentException("El estudiante no existe.");
+
+        // traer inscripciones y secciones para validar
         var inscripciones = await _repo.All();
+        var secctions = await _repoSecction.All();
+
+        // duplicado exacto
+        if (inscripciones.Any(i => i.StudentId == dto.StudentId && i.SecctionId == dto.SecctionId))
+            throw new ArgumentException("El estudiante ya está inscrito en esa sección.");
+
+        // cupo
         int ocupados = inscripciones.Count(i => i.SecctionId == dto.SecctionId);
-        if (ocupados >= sec.Capacity)
-            throw new ArgumentException("La sección ya alcanzó el cupo máximo.");
+        if (ocupados >= sec.Capacity) throw new ArgumentException("La sección ya alcanzó el cupo máximo.");
 
-        // 2️⃣ Validar conflicto de horario
+        // conflicto horario: comparar sección destino con secciones inscritas del estudiante
         var inscripcionesEst = inscripciones.Where(i => i.StudentId == dto.StudentId).ToList();
+
         bool conflicto = inscripcionesEst.Any(i =>
-            i.Secction != null &&
-            i.Secction.Day == sec.Day &&
-            i.Secction.StartTime < sec.EndTime &&
-            i.Secction.EndTime > sec.StartTime);
+        {
+            var s = secctions.FirstOrDefault(x => x.Id == i.SecctionId);
+            if (s == null) return false;
+            return s.Day == sec.Day && s.StartTime < sec.EndTime && s.EndTime > sec.StartTime;
+        });
 
-        if (conflicto)
-            throw new ArgumentException("El estudiante ya tiene una clase en ese horario.");
+        if (conflicto) throw new ArgumentException("El estudiante ya tiene una clase en ese horario.");
 
-        // 3️⃣ Crear inscripción
         var entity = ToEntity(dto);
         await _repo.Create(entity);
         await _repo.Save();
@@ -68,7 +78,6 @@ public class InscriptionService : IInscriptionService
     public async Task<bool> UpdateAsync(InscriptionDto dto)
     {
         if (dto.Id == null) return false;
-
         var exist = await _repo.ById(dto.Id.Value);
         if (exist == null) return false;
 
@@ -86,19 +95,12 @@ public class InscriptionService : IInscriptionService
         var ins = await _repo.ById(id);
         if (ins == null) return false;
 
-        // Si tiene calificación asociada, también eliminarla
-        if (ins.Grade != null)
-        {
-            ins.Grade = null;
-        }
-
         var ok = await _repo.Delete(id);
         if (!ok) return false;
         await _repo.Save();
         return true;
     }
 
-    // mapping
     private static InscriptionDto ToDto(Inscription i) => new()
     {
         Id = i.Id,

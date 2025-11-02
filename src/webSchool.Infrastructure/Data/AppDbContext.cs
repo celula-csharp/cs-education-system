@@ -1,6 +1,7 @@
 using System.Reflection;
 using domain.Entities;
 using Microsoft.EntityFrameworkCore;
+
 namespace infrastructure.Data;
 
 public class AppDbContext : DbContext
@@ -17,7 +18,6 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Aplicar todas las configuraciones desde el ensamblado actual
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         base.OnModelCreating(modelBuilder);
     }

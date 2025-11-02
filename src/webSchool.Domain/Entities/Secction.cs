@@ -12,5 +12,5 @@ public class Secction
     public int CourseId { get; set; }
     public Course? Course { get; set; }
 
-    private List<Inscription>? Inscriptions { get; set; } = new();
+    public List<Inscription>? Inscriptions { get; set; } = new();
 }

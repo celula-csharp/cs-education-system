@@ -1,18 +1,16 @@
-namespace application.Services;
-
-using application.DTOs;
-using application.Interfaces;
 using domain.Entities;
 using domain.Interfaces;
+using application.DTOs;
+
+namespace application.Services;
+
+using Interfaces;
 
 public class SecctionService : ISecctionService
 {
     private readonly IRepository<Secction> _repo;
 
-    public SecctionService(IRepository<Secction> repo)
-    {
-        _repo = repo;
-    }
+    public SecctionService(IRepository<Secction> repo) => _repo = repo;
 
     public async Task<List<SecctionDto>> AllAsync()
     {
@@ -29,14 +27,19 @@ public class SecctionService : ISecctionService
 
     public async Task<SecctionDto> CreateAsync(SecctionDto dto)
     {
-        if (dto.CourseId <= 0)
-            throw new ArgumentException("Debe asignarse un curso válido.");
+        if (dto.CourseId <= 0) throw new ArgumentException("Debe asignarse un curso válido.");
+        if (dto.Capacity <= 0) throw new ArgumentException("El cupo debe ser mayor a cero.");
+        if (dto.EndTime <= dto.StartTime) throw new ArgumentException("La hora final debe ser mayor que la hora de inicio.");
+        if (string.IsNullOrWhiteSpace(dto.Day)) throw new ArgumentException("El día es obligatorio.");
 
-        if (dto.Capacity <= 0)
-            throw new ArgumentException("El cupo debe ser mayor a cero.");
+        var all = await _repo.All();
+        bool overlap = all.Any(s =>
+            s.CourseId == dto.CourseId &&
+            s.Day == dto.Day &&
+            s.Id != dto.Id &&
+            s.StartTime < dto.EndTime && dto.StartTime < s.EndTime);
 
-        if (dto.EndTime <= dto.StartTime)
-            throw new ArgumentException("La hora final debe ser mayor que la hora de inicio.");
+        if (overlap) throw new ArgumentException("Ya existe una sección en ese horario para el curso.");
 
         var entity = ToEntity(dto);
         await _repo.Create(entity);
@@ -47,13 +50,20 @@ public class SecctionService : ISecctionService
     public async Task<bool> UpdateAsync(SecctionDto dto)
     {
         if (dto.Id == null) return false;
-
         var exist = await _repo.ById(dto.Id.Value);
         if (exist == null) return false;
 
-        // validaciones simples
         if (dto.Capacity <= 0) throw new ArgumentException("El cupo debe ser mayor que cero.");
         if (dto.EndTime <= dto.StartTime) throw new ArgumentException("La hora final debe ser mayor que la hora de inicio.");
+
+        var all = await _repo.All();
+        bool overlap = all.Any(s =>
+            s.CourseId == dto.CourseId &&
+            s.Day == dto.Day &&
+            s.Id != dto.Id &&
+            s.StartTime < dto.EndTime && dto.StartTime < s.EndTime);
+
+        if (overlap) throw new ArgumentException("Ya existe una sección en ese horario para el curso.");
 
         exist.Day = dto.Day;
         exist.StartTime = dto.StartTime;
@@ -71,10 +81,7 @@ public class SecctionService : ISecctionService
     {
         var sec = await _repo.ById(id);
         if (sec == null) return false;
-
-        // regla: no borrar si tiene inscripciones
-        var hasIns = sec.GetType().GetProperty("Inscriptions") != null; // verificación simple
-        if (hasIns) return false;
+        if (sec.Inscriptions != null && sec.Inscriptions.Any()) return false;
 
         var ok = await _repo.Delete(id);
         if (!ok) return false;
@@ -82,7 +89,6 @@ public class SecctionService : ISecctionService
         return true;
     }
 
-    // mapping
     private static SecctionDto ToDto(Secction s) => new()
     {
         Id = s.Id,

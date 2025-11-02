@@ -1,17 +1,20 @@
-namespace application.Services;
-
-using application.DTOs;
-using application.Interfaces;
 using domain.Entities;
 using domain.Interfaces;
+using application.DTOs;
+
+namespace application.Services;
+
+using Interfaces;
 
 public class CourseService : ICourseService
 {
     private readonly IRepository<Course> _repo;
+    private readonly IRepository<Professor> _repoProf;
 
-    public CourseService(IRepository<Course> repo)
+    public CourseService(IRepository<Course> repo, IRepository<Professor> repoProf)
     {
         _repo = repo;
+        _repoProf = repoProf;
     }
 
     public async Task<List<CourseDto>> AllAsync()
@@ -29,12 +32,15 @@ public class CourseService : ICourseService
 
     public async Task<CourseDto> CreateAsync(CourseDto dto)
     {
-        // validaciones básicas
-        if (string.IsNullOrWhiteSpace(dto.CourseName))
-            throw new ArgumentException("El nombre del curso es obligatorio.");
+        if (string.IsNullOrWhiteSpace(dto.CourseName)) throw new ArgumentException("El nombre del curso es obligatorio.");
+        if (dto.ProfessorId <= 0) throw new ArgumentException("Debe asignarse un profesor válido.");
 
-        if (dto.ProfessorId <= 0)
-            throw new ArgumentException("Debe asignarse un profesor válido.");
+        var prof = await _repoProf.ById(dto.ProfessorId);
+        if (prof == null) throw new ArgumentException("El profesor no existe.");
+
+        var all = await _repo.All();
+        if (all.Any(c => c.CourseName == dto.CourseName && c.ProfessorId == dto.ProfessorId))
+            throw new ArgumentException("El profesor ya tiene un curso con ese nombre.");
 
         var entity = ToEntity(dto);
         await _repo.Create(entity);
@@ -47,6 +53,10 @@ public class CourseService : ICourseService
         if (dto.Id == null) return false;
         var exist = await _repo.ById(dto.Id.Value);
         if (exist == null) return false;
+
+        var all = await _repo.All();
+        if (all.Any(c => c.CourseName == dto.CourseName && c.ProfessorId == dto.ProfessorId && c.Id != dto.Id))
+            throw new ArgumentException("El profesor ya tiene otro curso con ese nombre.");
 
         exist.CourseName = dto.CourseName;
         exist.CourseDescription = dto.CourseDescription;
@@ -62,9 +72,7 @@ public class CourseService : ICourseService
     {
         var course = await _repo.ById(id);
         if (course == null) return false;
-
-        // regla: no borrar si tiene secciones asociadas
-        if (course.Secctions != null && course.Secctions.Count != 0) return false;
+        if (course.Secctions != null && course.Secctions.Any()) return false;
 
         var ok = await _repo.Delete(id);
         if (!ok) return false;
@@ -72,7 +80,6 @@ public class CourseService : ICourseService
         return true;
     }
 
-    // mapping
     private static CourseDto ToDto(Course c) => new()
     {
         Id = c.Id,

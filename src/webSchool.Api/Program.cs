@@ -1,5 +1,7 @@
 using application.Extensions;
 using Infrastructure.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Middleware global de excepciones simple
+app.UseMiddleware<webSchool.Api.Middleware.ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.MapControllers();

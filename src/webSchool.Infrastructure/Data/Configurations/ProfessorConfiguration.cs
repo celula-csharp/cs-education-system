@@ -1,15 +1,14 @@
-namespace infrastructure.Data.Configurations;
+namespace Infrastructure.Data.Configurations;
 
 using domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class ProfessorConfiguration  : IEntityTypeConfiguration<Professor>
+public class ProfessorConfiguration : IEntityTypeConfiguration<Professor>
 {
     public void Configure(EntityTypeBuilder<Professor> builder)
     {
         builder.ToTable("Professors");
-
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Name).HasMaxLength(100);
@@ -19,9 +18,12 @@ public class ProfessorConfiguration  : IEntityTypeConfiguration<Professor>
         builder.Property(p => p.Phone).HasMaxLength(20);
         builder.Property(p => p.Specialty).HasMaxLength(100);
 
-        // Relación: un profesor puede tener varios cursos
-        builder.HasMany<Course>()
+        builder.HasIndex(p => p.Document).IsUnique();
+        builder.HasIndex(p => p.Email).IsUnique();
+
+        builder.HasMany(p => p.Courses)
             .WithOne(c => c.Professor)
-            .HasForeignKey(c => c.ProfessorId);
+            .HasForeignKey(c => c.ProfessorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

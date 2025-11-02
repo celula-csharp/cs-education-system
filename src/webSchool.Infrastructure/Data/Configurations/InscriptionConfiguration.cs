@@ -9,25 +9,23 @@ public class InscriptionConfiguration : IEntityTypeConfiguration<Inscription>
     public void Configure(EntityTypeBuilder<Inscription> builder)
     {
         builder.ToTable("Inscriptions");
-
         builder.HasKey(i => i.Id);
 
-        builder.Property(i => i.Date)
-            .HasColumnType("datetime");
+        builder.Property(i => i.Date).HasColumnType("datetime");
 
-        // Relación con estudiante
         builder.HasOne(i => i.Student)
             .WithMany(s => s.Inscriptions)
-            .HasForeignKey(i => i.StudentId);
+            .HasForeignKey(i => i.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // Relación con sección
         builder.HasOne(i => i.Secction)
-            .WithMany()
-            .HasForeignKey(i => i.SecctionId);
+            .WithMany(s => s.Inscriptions)
+            .HasForeignKey(i => i.SecctionId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // Relación uno a uno con calificación
         builder.HasOne(i => i.Grade)
             .WithOne(g => g.Inscription)
-            .HasForeignKey<Grades>(g => g.InscriptionId);
+            .HasForeignKey<Grades>(g => g.InscriptionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

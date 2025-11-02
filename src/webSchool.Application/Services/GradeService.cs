@@ -1,9 +1,10 @@
-namespace application.Services;
-
-using application.DTOs;
-using application.Interfaces;
 using domain.Entities;
 using domain.Interfaces;
+using application.DTOs;
+
+namespace application.Services;
+
+using Interfaces;
 
 public class GradeService : IGradeService
 {
@@ -31,17 +32,12 @@ public class GradeService : IGradeService
 
     public async Task<GradeDto> CreateAsync(GradeDto dto)
     {
-        if (dto.Grade < 0 || dto.Grade > 5)
-            throw new ArgumentException("La nota debe estar entre 0 y 5.");
-
-        if (dto.InscriptionId <= 0)
-            throw new ArgumentException("Debe asignarse una inscripción válida.");
+        if (dto.Grade < 0 || dto.Grade > 5) throw new ArgumentException("La nota debe estar entre 0 y 5.");
+        if (dto.InscriptionId <= 0) throw new ArgumentException("Debe asignarse una inscripción válida.");
 
         var ins = await _repoIns.ById(dto.InscriptionId);
-        if (ins == null)
-            throw new ArgumentException("La inscripción no existe.");
+        if (ins == null) throw new ArgumentException("La inscripción no existe.");
 
-        // Evitar duplicar calificación
         var all = await _repo.All();
         if (all.Any(g => g.InscriptionId == dto.InscriptionId))
             throw new ArgumentException("La inscripción ya tiene una nota asignada.");
@@ -55,8 +51,7 @@ public class GradeService : IGradeService
     public async Task<bool> UpdateAsync(GradeDto dto)
     {
         if (dto.Id == null) return false;
-        if (dto.Grade < 0 || dto.Grade > 5)
-            throw new ArgumentException("La nota debe estar entre 0 y 5.");
+        if (dto.Grade < 0 || dto.Grade > 5) throw new ArgumentException("La nota debe estar entre 0 y 5.");
 
         var exist = await _repo.ById(dto.Id.Value);
         if (exist == null) return false;
@@ -80,7 +75,6 @@ public class GradeService : IGradeService
         return true;
     }
 
-    // mappers
     private static GradeDto ToDto(Grades g) => new()
     {
         Id = g.Id,
