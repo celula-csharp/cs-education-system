@@ -1,8 +1,8 @@
-using System.Net;
-using Microsoft.AspNetCore.Http;
-using System.Text.Json;
+namespace docker_sharp.Middleware;
 
-namespace webSchool.Api.Middleware;
+using System.Net;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 public class ExceptionMiddleware
 {

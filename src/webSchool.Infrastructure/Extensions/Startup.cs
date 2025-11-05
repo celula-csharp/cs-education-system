@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
             )
         );
 
+        services.AddJwtService(configuration);
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         return services;
     }
